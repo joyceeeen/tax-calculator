@@ -296,7 +296,7 @@ export default function TaxCalculator() {
                   Income Tax Calculator
                 </h1>
                 <p className="text-neutral-500 text-sm mt-0.5">
-                  Australian Tax Office rates
+                  Australian Tax rates
                 </p>
               </div>
               <span className="text-xs font-medium text-neutral-400 bg-neutral-100 px-2.5 py-1 rounded-full">
