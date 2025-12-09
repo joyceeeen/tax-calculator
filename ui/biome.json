@@ -6,13 +6,11 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false,
-    "ignore": ["ui/node_modules/**", "ui/dist/**"]
+    "ignoreUnknown": false
   },
   "formatter": {
     "enabled": true,
     "formatWithErrors": true,
-    "includes": ["**/*", "!**/package.json"],
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
@@ -38,3 +36,4 @@
     }
   }
 }
+

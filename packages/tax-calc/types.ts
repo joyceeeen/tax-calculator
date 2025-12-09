@@ -21,3 +21,4 @@ export type CalculateTaxParams = {
   financialYear: FinancialYear;
   income: number;
 };
+

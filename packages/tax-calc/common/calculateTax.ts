@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import type { CalculateTaxParams } from "../types/types";
+import type { CalculateTaxParams } from "../types";
 import { taxTable } from "./taxTable";
 
 export const calculateTax = (params: CalculateTaxParams): number => {
@@ -24,3 +24,4 @@ export const calculateTax = (params: CalculateTaxParams): number => {
 
   return baseAmount + (income - previousBracketMax) * rate;
 };
+

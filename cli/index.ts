@@ -1,6 +1,5 @@
 import * as readline from "node:readline/promises";
-import { calculateTax } from "./common/calculateTax";
-import { FINANCIAL_YEARS, type FinancialYear } from "./types/types";
+import { calculateTax, FINANCIAL_YEARS, type FinancialYear } from "../packages/tax-calc/index";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("en-AU", {
@@ -14,18 +13,25 @@ const isValidFinancialYear = (year: string): year is FinancialYear =>
   FINANCIAL_YEARS.includes(year as FinancialYear);
 
 async function main() {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
   const yearInput = await rl.question(
-    `Please enter the income year (eg: ${FINANCIAL_YEARS[0]}): `
+    `Please enter the income year (eg: ${FINANCIAL_YEARS[0]}): `,
   );
   if (!isValidFinancialYear(yearInput)) {
-    console.error(`\nInvalid income year. Supported years: ${FINANCIAL_YEARS.join(", ")}`);
+    console.error(
+      `\nInvalid income year. Supported years: ${FINANCIAL_YEARS.join(", ")}`,
+    );
     rl.close();
     return;
   }
 
-  const incomeInput = await rl.question("\nPlease enter your total taxable income: ");
+  const incomeInput = await rl.question(
+    "\nPlease enter your total taxable income: ",
+  );
   rl.close();
 
   const income = parseFloat(incomeInput);
@@ -35,7 +41,10 @@ async function main() {
   }
 
   const tax = calculateTax({ financialYear: yearInput, income });
-  console.log(`\nThe estimated tax on your taxable income is: ${formatCurrency(tax)}`);
+  console.log(
+    `\nThe estimated tax on your taxable income is: ${formatCurrency(tax)}`,
+  );
 }
 
 main();
+

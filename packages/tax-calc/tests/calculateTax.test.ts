@@ -75,7 +75,7 @@ describe("calculateTax", () => {
 
     test("income of $18,202 (one dollar into taxable bracket)", () => {
       // First truly taxable amount
-      const expected =  (18_202 - 18_200) * 0.16;
+      const expected = (18_202 - 18_200) * 0.16;
       expect(calculateTax({ income: 18_202, financialYear: "2024-2025" })).toBe(
         expected,
       );
@@ -97,7 +97,7 @@ describe("calculateTax", () => {
     });
 
     test("income of exactly $135,000 (top of 3rd bracket)", () => {
-      const expected =4_288 + (135_000 - 45_000) * 0.3;
+      const expected = 4_288 + (135_000 - 45_000) * 0.3;
       expect(
         calculateTax({ income: 135_000, financialYear: "2024-2025" }),
       ).toBe(expected);
@@ -228,3 +228,4 @@ describe("calculateTax", () => {
     });
   });
 });
+
