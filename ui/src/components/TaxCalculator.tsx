@@ -136,7 +136,7 @@ export default function TaxCalculator() {
                             Medicare Levy (2.0%)
                           </span>
                           <span className="text-red-600 text-right">
-                            -{formatCurrency(0)}
+                            -{formatCurrency(result.medicareLevy)}
                           </span>
                         </div>
 
@@ -153,7 +153,7 @@ export default function TaxCalculator() {
                           Total Deductions
                         </span>
                         <span className="font-medium text-red-600 text-sm sm:text-base">
-                          -{formatCurrency(result.incomeTax)}
+                          -{formatCurrency(result.deductions)}
                         </span>
                       </div>
                     </div>

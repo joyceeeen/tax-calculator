@@ -1,4 +1,4 @@
-import type { CalculateTaxParams, CalculateTaxResult, FinancialYear, TaxBracket } from "../types";
+import type { CalculateTaxParams, CalculateTaxResult, TaxBracket } from "../types";
 import { taxTable } from "./taxTable";
 
 export const calculateTax = (params: CalculateTaxParams): number => {
@@ -37,17 +37,26 @@ const getTaxBracket = (params: CalculateTaxParams): TaxBracket | null => {
   return taxBracket;
 }
 
+export const calculateMedicareLevy = (params: CalculateTaxParams): number => {
+  const { income } = params;
+  return income * 0.02;
+}
+
 
 export const calculateTaxResult = (params: CalculateTaxParams): CalculateTaxResult => {
   const { income } = params;
   const incomeTax = calculateTax(params);
   const taxBracket = getTaxBracket(params);
-  const netIncome = income - incomeTax;
+  const medicareLevy = calculateMedicareLevy(params);
+  const deductions = incomeTax + medicareLevy;
+  const netIncome = income - deductions;
 
   return {
     ...params,
     netIncome,
     incomeTax,
+    medicareLevy,
+    deductions,
     taxBracket,
   }
 }

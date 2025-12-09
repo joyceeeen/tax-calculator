@@ -1,4 +1,4 @@
-import { calculateTax } from "../common/calculateTax";
+import { calculateTax } from "../common/calcuators";
 
 describe("calculateTax", () => {
   test("returns 0 tax for negative income", () => {
