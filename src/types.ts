@@ -10,3 +10,8 @@ export const FINANCIAL_YEARS = ["2021-2022", "2022-2023", "2023-2024", "2024-202
 export type FinancialYear = (typeof FINANCIAL_YEARS)[number];
 
 export type TaxTable = Record<FinancialYear, TaxBracket[]>;
+
+export type CalculateTaxParams = {
+  financialYear: FinancialYear;
+  income: number;
+};
