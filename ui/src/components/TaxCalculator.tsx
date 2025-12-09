@@ -8,27 +8,25 @@ import {
 import { cn } from '@utils/cn';
 import { formatCurrency, formatPercent, formatRange } from '@utils/helpers';
 import { ChevronDown } from 'lucide-react';
-import { memo, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const SEGMENT_CONFIG = [
+const SEGMENTS = [
   { key: 'net', color: 'bg-neutral-700', label: 'Net' },
   { key: 'tax', color: 'bg-neutral-400', label: 'Tax' },
   { key: 'medicare', color: 'bg-neutral-300', label: 'Medicare' },
 ] as const;
 
-interface ProgressBarProps {
-  values: { net: number; tax: number; medicare: number };
-  total: number;
-}
-
-const ProgressBar = memo(function ProgressBar({
+function ProgressBar({
   values,
   total,
-}: ProgressBarProps) {
+}: {
+  values: { net: number; tax: number; medicare: number };
+  total: number;
+}) {
   return (
     <div>
       <div className="h-2 bg-neutral-200 rounded-full overflow-hidden flex">
-        {SEGMENT_CONFIG.map(({ key, color }) => (
+        {SEGMENTS.map(({ key, color }) => (
           <div
             key={key}
             className={cn(color, 'transition-all duration-500 ease-out')}
@@ -37,7 +35,7 @@ const ProgressBar = memo(function ProgressBar({
         ))}
       </div>
       <div className="flex justify-between mt-2 text-xs text-neutral-500">
-        {SEGMENT_CONFIG.map(({ key, color, label }) => (
+        {SEGMENTS.map(({ key, color, label }) => (
           <span key={key} className="flex items-center gap-1.5">
             <span className={cn('w-2 h-2 rounded-full', color)} />
             {label}
@@ -46,23 +44,21 @@ const ProgressBar = memo(function ProgressBar({
       </div>
     </div>
   );
-});
-
-interface BreakdownRowProps {
-  label: string;
-  value: string;
-  isNegative?: boolean;
-  isBold?: boolean;
-  badge?: string;
 }
 
-const BreakdownRow = memo(function BreakdownRow({
+function BreakdownRow({
   label,
   value,
   isNegative,
   isBold,
   badge,
-}: BreakdownRowProps) {
+}: {
+  label: string;
+  value: string;
+  isNegative?: boolean;
+  isBold?: boolean;
+  badge?: string;
+}) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -93,22 +89,15 @@ const BreakdownRow = memo(function BreakdownRow({
       </span>
     </div>
   );
-});
-
-interface TaxBracketRowProps {
-  bracket: TaxBracket;
-  isCurrent: boolean;
 }
 
-const TaxBracketRow = memo(function TaxBracketRow({
+function TaxBracketRow({
   bracket,
   isCurrent,
-}: TaxBracketRowProps) {
-  const text = isCurrent ? 'font-medium text-neutral-900' : 'text-neutral-500';
-  const value = isCurrent
-    ? 'font-semibold text-neutral-900'
-    : 'text-neutral-400';
-
+}: {
+  bracket: TaxBracket;
+  isCurrent: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -123,33 +112,46 @@ const TaxBracketRow = memo(function TaxBracketRow({
             isCurrent ? 'bg-neutral-900' : 'bg-neutral-300',
           )}
         />
-        <span className={cn('text-sm tabular-nums', text)}>
+        <span
+          className={cn(
+            'text-sm tabular-nums',
+            isCurrent ? 'font-medium text-neutral-900' : 'text-neutral-500',
+          )}
+        >
           {formatRange(bracket.min, bracket.max)}
         </span>
       </div>
-      <span className={cn('text-sm tabular-nums text-center', value)}>
+      <span
+        className={cn(
+          'text-sm tabular-nums text-center',
+          isCurrent ? 'font-semibold text-neutral-900' : 'text-neutral-400',
+        )}
+      >
         {formatPercent(bracket.rate)}
       </span>
-      <span className={cn('text-sm tabular-nums text-right', value)}>
+      <span
+        className={cn(
+          'text-sm tabular-nums text-right',
+          isCurrent ? 'font-semibold text-neutral-900' : 'text-neutral-400',
+        )}
+      >
         {formatCurrency(bracket.baseAmount)}
       </span>
     </div>
   );
-});
-
-interface TaxBracketsAccordionProps {
-  taxTable: TaxBracket[];
-  currentIndex: number;
-  isExpanded: boolean;
-  onToggle: () => void;
 }
 
-const TaxBracketsAccordion = memo(function TaxBracketsAccordion({
+function TaxBracketsAccordion({
   taxTable,
   currentIndex,
   isExpanded,
   onToggle,
-}: TaxBracketsAccordionProps) {
+}: {
+  taxTable: TaxBracket[];
+  currentIndex: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
   const currentBracket = taxTable[currentIndex];
 
   return (
@@ -212,27 +214,18 @@ const TaxBracketsAccordion = memo(function TaxBracketsAccordion({
       </div>
     </div>
   );
-});
-
-interface ResultsSectionProps {
-  result: CalculateTaxResult;
-  isBracketsExpanded: boolean;
-  onToggleBrackets: () => void;
 }
 
-const ResultsSection = memo(function ResultsSection({
+function ResultsSection({
   result,
   isBracketsExpanded,
   onToggleBrackets,
-}: ResultsSectionProps) {
-  const {
-    income,
-    netIncome,
-    incomeTax,
-    medicareLevy,
-    taxTable,
-    taxBracketIndex,
-  } = result;
+}: {
+  result: CalculateTaxResult;
+  isBracketsExpanded: boolean;
+  onToggleBrackets: () => void;
+}) {
+  const { income, netIncome, incomeTax, medicareLevy, taxTable, taxBracketIndex } = result;
   const takeHomePercent = ((netIncome / income) * 100).toFixed(1);
 
   return (
@@ -256,17 +249,9 @@ const ResultsSection = memo(function ResultsSection({
       </div>
 
       <div className="p-6 border-t border-neutral-100 flex flex-col gap-4">
-        <BreakdownRow
-          label="Gross Income"
-          value={formatCurrency(income)}
-          isBold
-        />
+        <BreakdownRow label="Gross Income" value={formatCurrency(income)} isBold />
         <div className="border-t border-neutral-100" />
-        <BreakdownRow
-          label="Income Tax"
-          value={formatCurrency(incomeTax)}
-          isNegative
-        />
+        <BreakdownRow label="Income Tax" value={formatCurrency(incomeTax)} isNegative />
         <div className="border-t border-neutral-100" />
         <BreakdownRow
           label="Medicare Levy"
@@ -275,11 +260,7 @@ const ResultsSection = memo(function ResultsSection({
           badge="2%"
         />
         <div className="border-t-2 border-neutral-200" />
-        <BreakdownRow
-          label="Net Income"
-          value={formatCurrency(netIncome)}
-          isBold
-        />
+        <BreakdownRow label="Net Income" value={formatCurrency(netIncome)} isBold />
 
         <TaxBracketsAccordion
           taxTable={taxTable}
@@ -290,22 +271,8 @@ const ResultsSection = memo(function ResultsSection({
       </div>
     </div>
   );
-});
+}
 
-const EmptyState = memo(function EmptyState() {
-  return (
-    <div className="px-6 py-12 text-center border-t border-neutral-100">
-      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-neutral-100 flex items-center justify-center">
-        <span className="text-xl text-neutral-400">$</span>
-      </div>
-      <p className="text-neutral-500 text-sm">
-        Enter your annual income to calculate
-      </p>
-    </div>
-  );
-});
-
-// Main Component
 export default function TaxCalculator() {
   const [selectedYear, setSelectedYear] = useState<FinancialYear>('2024-2025');
   const [income, setIncome] = useState('');
@@ -352,9 +319,7 @@ export default function TaxCalculator() {
                   <select
                     id="year-select"
                     value={selectedYear}
-                    onChange={(e) =>
-                      setSelectedYear(e.target.value as FinancialYear)
-                    }
+                    onChange={(e) => setSelectedYear(e.target.value as FinancialYear)}
                     className="w-full h-11 px-3.5 pr-9 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm font-medium appearance-none cursor-pointer hover:bg-neutral-100 hover:border-neutral-300 focus:outline-none focus:bg-white focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                   >
                     {FINANCIAL_YEARS.map((year) => (
@@ -401,7 +366,14 @@ export default function TaxCalculator() {
               onToggleBrackets={() => setIsBracketsExpanded((prev) => !prev)}
             />
           ) : (
-            <EmptyState />
+            <div className="px-6 py-12 text-center border-t border-neutral-100">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-neutral-100 flex items-center justify-center">
+                <span className="text-xl text-neutral-400">$</span>
+              </div>
+              <p className="text-neutral-500 text-sm">
+                Enter your annual income to calculate
+              </p>
+            </div>
           )}
         </div>
 
