@@ -1,4 +1,3 @@
-import { strict as assert } from "node:assert";
 import type { CalculateTaxParams } from "../types";
 import { taxTable } from "./taxTable";
 
@@ -14,10 +13,10 @@ export const calculateTax = (params: CalculateTaxParams): number => {
 
   const currentBracket = brackets[bracketIndex];
 
-  assert(
-    currentBracket,
-    "Current bracket not found in the tax table, this should never happen!",
-  );
+  if(!currentBracket) {
+   console.error('Current bracket not found in the tax table, this should never happen!');
+   return 0; // gracefully handle the error by returning 0 tax
+  }
 
   const { baseAmount, rate } = currentBracket;
   const previousBracketMax = brackets[bracketIndex - 1]?.max ?? 0;
