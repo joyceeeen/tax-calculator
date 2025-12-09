@@ -132,7 +132,7 @@ export default function TaxCalculator() {
                     {takeHomePercent}% of gross income
                   </p>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="mt-5">
                   <div className="h-2 bg-neutral-200 rounded-full overflow-hidden flex">
@@ -176,7 +176,9 @@ export default function TaxCalculator() {
               <div className="px-6 py-5 border-t border-neutral-100">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-sm text-neutral-600">Gross Income</span>
+                    <span className="text-sm text-neutral-600">
+                      Gross Income
+                    </span>
                     <span className="text-sm font-semibold text-neutral-900 tabular-nums">
                       {formatCurrency(result.income)}
                     </span>
@@ -189,7 +191,9 @@ export default function TaxCalculator() {
                   </div>
                   <div className="flex items-center justify-between py-2 border-t border-neutral-100">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-neutral-600">Medicare Levy</span>
+                      <span className="text-sm text-neutral-600">
+                        Medicare Levy
+                      </span>
                       <span className="text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
                         2%
                       </span>
@@ -199,7 +203,9 @@ export default function TaxCalculator() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between py-3 border-t-2 border-neutral-200">
-                    <span className="text-sm font-semibold text-neutral-900">Net Income</span>
+                    <span className="text-sm font-semibold text-neutral-900">
+                      Net Income
+                    </span>
                     <span className="text-base font-bold text-neutral-900 tabular-nums">
                       {formatCurrency(result.netIncome)}
                     </span>
@@ -233,7 +239,8 @@ export default function TaxCalculator() {
                   <div className="overflow-hidden">
                     <div className="px-6 pb-5 space-y-1">
                       {result.taxTable.map((bracket, index) => {
-                        const isCurrentBracket = index === result.taxBracketIndex;
+                        const isCurrentBracket =
+                          index === result.taxBracketIndex;
                         const formatRange = (min: number, max: number) => {
                           if (max === Infinity) {
                             return `${formatCurrency(min)}+`;
@@ -245,15 +252,15 @@ export default function TaxCalculator() {
                           <div
                             key={`${bracket.min}-${bracket.max}`}
                             className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors ${
-                              isCurrentBracket
-                                ? 'bg-neutral-100'
-                                : ''
+                              isCurrentBracket ? 'bg-neutral-100' : ''
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
                               <span
                                 className={`w-1.5 h-1.5 rounded-full ${
-                                  isCurrentBracket ? 'bg-neutral-900' : 'bg-neutral-300'
+                                  isCurrentBracket
+                                    ? 'bg-neutral-900'
+                                    : 'bg-neutral-300'
                                 }`}
                               />
                               <span
@@ -278,20 +285,25 @@ export default function TaxCalculator() {
                           </div>
                         );
                       })}
-                      {result.taxBracketIndex >= 0 && (() => {
-                        const currentBracket = result.taxTable[result.taxBracketIndex];
-                        if (!currentBracket) return null;
-                        return (
-                          <p className="text-xs text-neutral-500 mt-3 px-3">
-                            Your marginal rate: {(currentBracket.rate * 100).toFixed(0)}%
-                            {currentBracket.baseAmount > 0 && (
-                              <span className="text-neutral-400">
-                                {' '}· Base: {formatCurrency(currentBracket.baseAmount)}
-                              </span>
-                            )}
-                          </p>
-                        );
-                      })()}
+                      {result.taxBracketIndex >= 0 &&
+                        (() => {
+                          const currentBracket =
+                            result.taxTable[result.taxBracketIndex];
+                          if (!currentBracket) return null;
+                          return (
+                            <p className="text-xs text-neutral-500 mt-3 px-3">
+                              Your marginal rate:{' '}
+                              {(currentBracket.rate * 100).toFixed(0)}%
+                              {currentBracket.baseAmount > 0 && (
+                                <span className="text-neutral-400">
+                                  {' '}
+                                  · Base:{' '}
+                                  {formatCurrency(currentBracket.baseAmount)}
+                                </span>
+                              )}
+                            </p>
+                          );
+                        })()}
                     </div>
                   </div>
                 </div>
