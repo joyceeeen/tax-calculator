@@ -2,7 +2,7 @@ import type { TaxTable } from "../types";
 
 
 // Reference: https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents#ato-Australianresidenttaxrates2020to2026
-export const taxTable: TaxTable = {
+export const TAX_TABLE: TaxTable = {
   "2021-2022": [
     { min: 0, max: 18_200, rate: 0, baseAmount: 0 },
     { min: 18_201, max: 45_000, rate: 0.19, baseAmount: 0 },

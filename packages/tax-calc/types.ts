@@ -29,5 +29,6 @@ export type CalculateTaxResult = {
   netIncome: number;
   medicareLevy: number;
   deductions: number;
-  taxBracket: TaxBracket | null;
+  taxTable: TaxBracket[];
+  taxBracketIndex: number;
 }

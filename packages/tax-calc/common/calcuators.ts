@@ -1,13 +1,11 @@
 import type { CalculateTaxParams, CalculateTaxResult, TaxBracket } from "../types";
-import { taxTable } from "./taxTable";
+import { TAX_TABLE } from "./taxTable";
 
 export const calculateTax = (params: CalculateTaxParams): number => {
   const { financialYear, income } = params;
-  const brackets = taxTable[financialYear];
+  const brackets = TAX_TABLE[financialYear];
 
-  const bracketIndex = brackets.findIndex(
-    (bracket) => income >= bracket.min && income <= bracket.max,
-  );
+  const bracketIndex = findTaxBracketIndex(params);
 
   if (bracketIndex === -1) return 0;
 
@@ -24,17 +22,10 @@ export const calculateTax = (params: CalculateTaxParams): number => {
   return baseAmount + (income - previousBracketMax) * rate;
 };
 
-const getTaxBracket = (params: CalculateTaxParams): TaxBracket | null => {
+const findTaxBracketIndex = (params: CalculateTaxParams): number => {
   const { financialYear, income } = params;
 
-  const taxBracket = taxTable[financialYear].find(bracket => income >= bracket.min && income <= bracket.max);
-
-  if(!taxBracket) {
-      console.error('Tax bracket not found in the tax table, this should never happen as its already handled above! ');
-  return null;
-  }
-  
-  return taxBracket;
+  return TAX_TABLE[financialYear].findIndex(bracket => income >= bracket.min && income <= bracket.max);
 }
 
 export const calculateMedicareLevy = (params: CalculateTaxParams): number => {
@@ -44,10 +35,14 @@ export const calculateMedicareLevy = (params: CalculateTaxParams): number => {
 
 
 export const calculateTaxResult = (params: CalculateTaxParams): CalculateTaxResult => {
-  const { income } = params;
+  const { income, financialYear } = params;
+  
+  const taxBracketIndex = findTaxBracketIndex(params);
+  const taxTable = TAX_TABLE[financialYear];
+
   const incomeTax = calculateTax(params);
-  const taxBracket = getTaxBracket(params);
   const medicareLevy = calculateMedicareLevy(params);
+  
   const deductions = incomeTax + medicareLevy;
   const netIncome = income - deductions;
 
@@ -57,6 +52,7 @@ export const calculateTaxResult = (params: CalculateTaxParams): CalculateTaxResu
     incomeTax,
     medicareLevy,
     deductions,
-    taxBracket,
+    taxBracketIndex,
+    taxTable,
   }
 }

@@ -3,19 +3,13 @@ import {
   FINANCIAL_YEARS,
   type FinancialYear,
 } from '@tax-calc/index';
-import {
-  Calculator,
-  Calendar,
-  DollarSign,
-  FileText,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 export default function TaxCalculator() {
   const [selectedYear, setSelectedYear] = useState<FinancialYear>('2024-2025');
   const [income, setIncome] = useState('');
+  const [isBracketsExpanded, setIsBracketsExpanded] = useState(false);
 
   const yearId = 'year-select';
   const incomeId = 'income-input';
@@ -24,7 +18,8 @@ export default function TaxCalculator() {
     return new Intl.NumberFormat('en-AU', {
       style: 'currency',
       currency: 'AUD',
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(value);
   };
 
@@ -38,39 +33,51 @@ export default function TaxCalculator() {
     });
   }, [income, incomeValue, selectedYear]);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 md:p-12">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="flex flex-col lg:flex-row">
-            {/* Input Section */}
-            <div className="flex-1 p-6 sm:p-8 lg:p-10">
-              <header className="flex items-center gap-3 mb-8">
-                <div className="p-2.5 bg-indigo-100 rounded-xl">
-                  <Calculator className="w-7 h-7 text-indigo-600" />
-                </div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Australian Tax Calculator
-                </h1>
-              </header>
+  const takeHomePercent = result
+    ? ((result.netIncome / result.income) * 100).toFixed(1)
+    : '0';
 
-              <div className="flex flex-col gap-6">
-                {/* Year Selection */}
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor={yearId}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                  >
-                    <Calendar className="w-4 h-4 text-gray-500" />
-                    Financial Year
-                  </label>
+  return (
+    <div className="min-h-screen bg-neutral-50 p-4 sm:p-6 lg:p-8 flex items-start justify-center">
+      <div className="w-full max-w-lg pt-8 sm:pt-16">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-neutral-200/80">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-5 border-b border-neutral-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-semibold text-neutral-900">
+                  Income Tax Calculator
+                </h1>
+                <p className="text-neutral-500 text-sm mt-0.5">
+                  Australian Tax Office rates
+                </p>
+              </div>
+              <span className="text-xs font-medium text-neutral-400 bg-neutral-100 px-2.5 py-1 rounded-full">
+                FY {selectedYear}
+              </span>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="px-6 py-5 space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              {/* Year Selection */}
+              <div>
+                <label
+                  htmlFor={yearId}
+                  className="block text-sm font-medium text-neutral-700 mb-1.5"
+                >
+                  Financial Year
+                </label>
+                <div className="relative">
                   <select
                     id={yearId}
                     value={selectedYear}
                     onChange={(e) =>
                       setSelectedYear(e.target.value as FinancialYear)
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full h-11 px-3.5 pr-9 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm font-medium appearance-none cursor-pointer hover:bg-neutral-100 hover:border-neutral-300 focus:outline-none focus:bg-white focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                   >
                     {FINANCIAL_YEARS.map((year) => (
                       <option key={year} value={year}>
@@ -78,128 +85,242 @@ export default function TaxCalculator() {
                       </option>
                     ))}
                   </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
                 </div>
+              </div>
 
-                {/* Income Input */}
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor={incomeId}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                  >
-                    <DollarSign className="w-4 h-4 text-gray-500" />
-                    Annual Taxable Income
-                  </label>
+              {/* Income Input */}
+              <div>
+                <label
+                  htmlFor={incomeId}
+                  className="block text-sm font-medium text-neutral-700 mb-1.5"
+                >
+                  Annual Income
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm font-medium pointer-events-none">
+                    $
+                  </span>
                   <input
                     id={incomeId}
                     type="number"
                     value={income}
                     onChange={(e) => setIncome(e.target.value)}
-                    placeholder="Enter your income"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all"
+                    placeholder="0.00"
+                    className="w-full h-11 pl-7 pr-3.5 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm font-medium placeholder:text-neutral-400 placeholder:font-normal hover:bg-neutral-100 hover:border-neutral-300 focus:outline-none focus:bg-white focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                     min="0"
-                    step="0.01"
+                    step="1"
                   />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Results Section */}
-            <div className="flex-1 bg-gray-50 p-6 sm:p-8 lg:p-10 border-t lg:border-t-0 lg:border-l border-gray-100">
-              {result ? (
-                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                      Summary
-                    </h2>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm sm:text-base text-gray-600">
-                        Gross Monthly Salary
-                      </span>
-                      <span className="font-medium text-gray-900 text-sm sm:text-base">
-                        {formatCurrency(result.income)}
-                      </span>
-                    </div>
-
-                    <div className="border-t pt-3">
-                      <h3 className="font-medium text-gray-700 mb-2 flex items-center gap-2 text-sm sm:text-base">
-                        <TrendingDown className="w-4 h-4 text-red-500" />
-                        Annual Deductions
-                      </h3>
-
-                      <div className="space-y-2 ml-4 sm:ml-6">
-                        <div className="flex justify-between items-center text-xs sm:text-sm">
-                          <span className="text-gray-600 pr-2">
-                            Medicare Levy (2.0%)
-                          </span>
-                          <span className="text-red-600 text-right">
-                            -{formatCurrency(result.medicareLevy)}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-xs sm:text-sm">
-                          <span className="text-gray-600 pr-2">Income Tax</span>
-                          <span className="text-red-600 text-right">
-                            -{formatCurrency(result.incomeTax)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center py-2 mt-3 border-t">
-                        <span className="text-sm sm:text-base text-gray-600">
-                          Total Deductions
-                        </span>
-                        <span className="font-medium text-red-600 text-sm sm:text-base">
-                          -{formatCurrency(result.deductions)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-                          <span className="pr-2">Net Annual Income</span>
-                        </span>
-                        <span className="text-lg sm:text-xl font-bold text-green-600">
-                          {formatCurrency(result.netIncome)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
-                  <div className="p-4 bg-gray-100 rounded-full">
-                    <Calculator className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-500 text-sm max-w-[200px]">
-                    Enter your income to see your tax summary
+          {/* Results */}
+          {result ? (
+            <>
+              {/* Primary Result */}
+              <div className="px-6 py-6 bg-neutral-100">
+                <div className="text-center">
+                  <p className="text-neutral-500 text-xs font-medium uppercase tracking-wider mb-1">
+                    Take Home Pay
+                  </p>
+                  <p className="text-3xl sm:text-4xl font-semibold text-neutral-900 tabular-nums tracking-tight">
+                    {formatCurrency(result.netIncome)}
+                  </p>
+                  <p className="text-neutral-500 text-sm mt-1">
+                    {takeHomePercent}% of gross income
                   </p>
                 </div>
-              )}
+                
+                {/* Progress Bar */}
+                <div className="mt-5">
+                  <div className="h-2 bg-neutral-200 rounded-full overflow-hidden flex">
+                    <div
+                      className="bg-neutral-700 transition-all duration-500 ease-out"
+                      style={{
+                        width: `${(result.netIncome / result.income) * 100}%`,
+                      }}
+                    />
+                    <div
+                      className="bg-neutral-400 transition-all duration-500 ease-out"
+                      style={{
+                        width: `${(result.incomeTax / result.income) * 100}%`,
+                      }}
+                    />
+                    <div
+                      className="bg-neutral-300 transition-all duration-500 ease-out"
+                      style={{
+                        width: `${(result.medicareLevy / result.income) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs text-neutral-500">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-neutral-700" />
+                      Net
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-neutral-400" />
+                      Tax
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-neutral-300" />
+                      Medicare
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Breakdown */}
+              <div className="px-6 py-5 border-t border-neutral-100">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-neutral-600">Gross Income</span>
+                    <span className="text-sm font-semibold text-neutral-900 tabular-nums">
+                      {formatCurrency(result.income)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-t border-neutral-100">
+                    <span className="text-sm text-neutral-600">Income Tax</span>
+                    <span className="text-sm font-medium text-neutral-700 tabular-nums">
+                      −{formatCurrency(result.incomeTax)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-t border-neutral-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-neutral-600">Medicare Levy</span>
+                      <span className="text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
+                        2%
+                      </span>
+                    </div>
+                    <span className="text-sm font-medium text-neutral-700 tabular-nums">
+                      −{formatCurrency(result.medicareLevy)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-t-2 border-neutral-200">
+                    <span className="text-sm font-semibold text-neutral-900">Net Income</span>
+                    <span className="text-base font-bold text-neutral-900 tabular-nums">
+                      {formatCurrency(result.netIncome)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tax Brackets - Collapsible */}
+              <div className="border-t border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => setIsBracketsExpanded(!isBracketsExpanded)}
+                  className="flex items-center justify-between w-full px-6 py-4 hover:bg-neutral-50 transition-colors"
+                >
+                  <span className="text-sm font-medium text-neutral-600">
+                    View Tax Brackets
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${
+                      isBracketsExpanded ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    isBracketsExpanded
+                      ? 'grid-rows-[1fr] opacity-100'
+                      : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-6 pb-5 space-y-1">
+                      {result.taxTable.map((bracket, index) => {
+                        const isCurrentBracket = index === result.taxBracketIndex;
+                        const formatRange = (min: number, max: number) => {
+                          if (max === Infinity) {
+                            return `${formatCurrency(min)}+`;
+                          }
+                          return `${formatCurrency(min)} – ${formatCurrency(max)}`;
+                        };
+
+                        return (
+                          <div
+                            key={`${bracket.min}-${bracket.max}`}
+                            className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors ${
+                              isCurrentBracket
+                                ? 'bg-neutral-100'
+                                : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  isCurrentBracket ? 'bg-neutral-900' : 'bg-neutral-300'
+                                }`}
+                              />
+                              <span
+                                className={`text-sm tabular-nums ${
+                                  isCurrentBracket
+                                    ? 'font-medium text-neutral-900'
+                                    : 'text-neutral-500'
+                                }`}
+                              >
+                                {formatRange(bracket.min, bracket.max)}
+                              </span>
+                            </div>
+                            <span
+                              className={`text-sm tabular-nums ${
+                                isCurrentBracket
+                                  ? 'font-semibold text-neutral-900'
+                                  : 'text-neutral-400'
+                              }`}
+                            >
+                              {(bracket.rate * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                        );
+                      })}
+                      {result.taxBracketIndex >= 0 && (() => {
+                        const currentBracket = result.taxTable[result.taxBracketIndex];
+                        if (!currentBracket) return null;
+                        return (
+                          <p className="text-xs text-neutral-500 mt-3 px-3">
+                            Your marginal rate: {(currentBracket.rate * 100).toFixed(0)}%
+                            {currentBracket.baseAmount > 0 && (
+                              <span className="text-neutral-400">
+                                {' '}· Base: {formatCurrency(currentBracket.baseAmount)}
+                              </span>
+                            )}
+                          </p>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="px-6 py-12 text-center border-t border-neutral-100">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-neutral-100 flex items-center justify-center">
+                <span className="text-xl text-neutral-400">$</span>
+              </div>
+              <p className="text-neutral-500 text-sm">
+                Enter your annual income to calculate
+              </p>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}
-        <footer className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            Estimates based on ATO tax rates for {selectedYear}. For official
-            calculations, visit{' '}
-            <a
-              href="https://www.ato.gov.au"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-600 hover:text-indigo-700 underline"
-            >
-              ato.gov.au
-            </a>
-          </p>
-        </footer>
+        <p className="text-center text-xs text-neutral-400 mt-6 px-4">
+          Estimates based on ATO rates. Excludes HELP, offsets & deductions.{' '}
+          <a
+            href="https://www.ato.gov.au"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-500 hover:text-neutral-700 underline underline-offset-2 transition-colors"
+          >
+            ato.gov.au
+          </a>
+        </p>
       </div>
     </div>
   );
