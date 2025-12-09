@@ -1,4 +1,4 @@
-export { calculateTax } from "./common/calculateTax";
+export { calculateTax, calculateTaxResult } from "./common/calculateTax";
 export { taxTable } from "./common/taxTable";
 export {
   FINANCIAL_YEARS,

@@ -1,4 +1,4 @@
-import type { CalculateTaxParams } from "../types";
+import type { CalculateTaxParams, CalculateTaxResult, FinancialYear, TaxBracket } from "../types";
 import { taxTable } from "./taxTable";
 
 export const calculateTax = (params: CalculateTaxParams): number => {
@@ -14,8 +14,8 @@ export const calculateTax = (params: CalculateTaxParams): number => {
   const currentBracket = brackets[bracketIndex];
 
   if(!currentBracket) {
-   console.error('Current bracket not found in the tax table, this should never happen!');
-   return 0; // gracefully handle the error by returning 0 tax
+   console.error('Current bracket not found in the tax table, this should never happen as its already handled above! ');
+   return 0;
   }
 
   const { baseAmount, rate } = currentBracket;
@@ -24,3 +24,30 @@ export const calculateTax = (params: CalculateTaxParams): number => {
   return baseAmount + (income - previousBracketMax) * rate;
 };
 
+const getTaxBracket = (params: CalculateTaxParams): TaxBracket | null => {
+  const { financialYear, income } = params;
+
+  const taxBracket = taxTable[financialYear].find(bracket => income >= bracket.min && income <= bracket.max);
+
+  if(!taxBracket) {
+      console.error('Tax bracket not found in the tax table, this should never happen as its already handled above! ');
+  return null;
+  }
+  
+  return taxBracket;
+}
+
+
+export const calculateTaxResult = (params: CalculateTaxParams): CalculateTaxResult => {
+  const { income } = params;
+  const incomeTax = calculateTax(params);
+  const taxBracket = getTaxBracket(params);
+  const netIncome = income - incomeTax;
+
+  return {
+    ...params,
+    netIncome,
+    incomeTax,
+    taxBracket,
+  }
+}

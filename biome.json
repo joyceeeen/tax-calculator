@@ -6,8 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false,
-    "ignore": ["ui/node_modules/**", "ui/dist/**"]
+    "ignoreUnknown": false
   },
   "formatter": {
     "enabled": true,
@@ -26,7 +25,7 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double"
+      "quoteStyle": "single"
     }
   },
   "assist": {

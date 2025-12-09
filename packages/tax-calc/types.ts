@@ -22,3 +22,10 @@ export type CalculateTaxParams = {
   income: number;
 };
 
+export type CalculateTaxResult = {
+  financialYear: FinancialYear;
+  incomeTax: number;
+  income: number;
+  netIncome: number;
+  taxBracket: TaxBracket | null;
+}
