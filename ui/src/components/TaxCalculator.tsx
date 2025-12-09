@@ -173,7 +173,7 @@ export default function TaxCalculator() {
               </div>
 
               {/* Breakdown */}
-              <div className="px-6 py-5 border-t border-neutral-100">
+              <div className="px-6 border-t border-neutral-100">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2">
                     <span className="text-sm text-neutral-600">
@@ -214,11 +214,11 @@ export default function TaxCalculator() {
               </div>
 
               {/* Tax Brackets - Collapsible */}
-              <div className="border-t border-neutral-100">
+              <div >
                 <button
                   type="button"
                   onClick={() => setIsBracketsExpanded(!isBracketsExpanded)}
-                  className="flex items-center justify-between w-full px-6 py-4 hover:bg-neutral-50 transition-colors"
+                  className="flex items-center justify-between w-full px-6 py-4"
                 >
                   <span className="text-sm font-medium text-neutral-600">
                     View Tax Brackets
@@ -237,10 +237,23 @@ export default function TaxCalculator() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-6 pb-5 space-y-1">
+                    <div className="px-6 pb-5 flex flex-col gap-1">
+                      {/* Header */}
+                      <div className="grid grid-cols-[1fr_4rem_5rem] gap-4 items-center py-2 px-3">
+                        <span className="text-xs font-medium text-neutral-400  tracking-wide">
+                          Income Range
+                        </span>
+                        <span className="text-xs font-medium text-neutral-400  tracking-wide text-center">
+                          Rate
+                        </span>
+                        <span className="text-xs font-medium text-neutral-400  tracking-wide text-right">
+                          Base
+                        </span>
+                      </div>
                       {result.taxTable.map((bracket, index) => {
                         const isCurrentBracket =
                           index === result.taxBracketIndex;
+
                         const formatRange = (min: number, max: number) => {
                           if (max === Infinity) {
                             return `${formatCurrency(min)}+`;
@@ -251,13 +264,13 @@ export default function TaxCalculator() {
                         return (
                           <div
                             key={`${bracket.min}-${bracket.max}`}
-                            className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors ${
+                            className={`grid grid-cols-[1fr_4rem_5rem] gap-4 items-center py-2 px-3 rounded-lg transition-colors ${
                               isCurrentBracket ? 'bg-neutral-100' : ''
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
                               <span
-                                className={`w-1.5 h-1.5 rounded-full ${
+                                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                                   isCurrentBracket
                                     ? 'bg-neutral-900'
                                     : 'bg-neutral-300'
@@ -274,13 +287,22 @@ export default function TaxCalculator() {
                               </span>
                             </div>
                             <span
-                              className={`text-sm tabular-nums ${
+                              className={`text-sm tabular-nums text-center ${
                                 isCurrentBracket
                                   ? 'font-semibold text-neutral-900'
                                   : 'text-neutral-400'
                               }`}
                             >
                               {(bracket.rate * 100).toFixed(0)}%
+                            </span>
+                            <span
+                              className={`text-sm tabular-nums text-right ${
+                                isCurrentBracket
+                                  ? 'font-semibold text-neutral-900'
+                                  : 'text-neutral-400'
+                              }`}
+                            >
+                              {formatCurrency(bracket.baseAmount)}
                             </span>
                           </div>
                         );
