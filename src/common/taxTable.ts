@@ -26,14 +26,14 @@ export const taxTable: TaxTable = {
   "2024-2025": [
     { min: 0, max: 18_200, rate: 0, baseAmount: 0 },
     { min: 18_201, max: 45_000, rate: 0.16, baseAmount: 0 },
-    { min: 45_001, max: 135_000, rate: 0.30, baseAmount: 4_288 },
+    { min: 45_001, max: 135_000, rate: 0.3, baseAmount: 4_288 },
     { min: 135_001, max: 190_000, rate: 0.37, baseAmount: 31_288 },
     { min: 190_001, max: Infinity, rate: 0.45, baseAmount: 51_638 },
   ],
   "2025-2026": [
     { min: 0, max: 18_200, rate: 0, baseAmount: 0 },
     { min: 18_201, max: 45_000, rate: 0.16, baseAmount: 0 },
-    { min: 45_001, max: 135_000, rate: 0.30, baseAmount: 4_288 },
+    { min: 45_001, max: 135_000, rate: 0.3, baseAmount: 4_288 },
     { min: 135_001, max: 190_000, rate: 0.37, baseAmount: 31_288 },
     { min: 190_001, max: Infinity, rate: 0.45, baseAmount: 51_638 },
   ],
