@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@tax-calc': path.resolve(__dirname, '../packages/tax-calc'),
       '@components': path.resolve(__dirname, './src/components'),
+      '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
 });

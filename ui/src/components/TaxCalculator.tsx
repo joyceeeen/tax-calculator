@@ -1,46 +1,325 @@
 import {
+  type CalculateTaxResult,
   calculateTaxResult,
   FINANCIAL_YEARS,
   type FinancialYear,
+  type TaxBracket,
 } from '@tax-calc/index';
+import { cn } from '@utils/cn';
+import { formatCurrency, formatPercent, formatRange } from '@utils/helpers';
 import { ChevronDown } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 
+const SEGMENT_CONFIG = [
+  { key: 'net', color: 'bg-neutral-700', label: 'Net' },
+  { key: 'tax', color: 'bg-neutral-400', label: 'Tax' },
+  { key: 'medicare', color: 'bg-neutral-300', label: 'Medicare' },
+] as const;
+
+interface ProgressBarProps {
+  values: { net: number; tax: number; medicare: number };
+  total: number;
+}
+
+const ProgressBar = memo(function ProgressBar({
+  values,
+  total,
+}: ProgressBarProps) {
+  return (
+    <div>
+      <div className="h-2 bg-neutral-200 rounded-full overflow-hidden flex">
+        {SEGMENT_CONFIG.map(({ key, color }) => (
+          <div
+            key={key}
+            className={cn(color, 'transition-all duration-500 ease-out')}
+            style={{ width: `${(values[key] / total) * 100}%` }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-between mt-2 text-xs text-neutral-500">
+        {SEGMENT_CONFIG.map(({ key, color, label }) => (
+          <span key={key} className="flex items-center gap-1.5">
+            <span className={cn('w-2 h-2 rounded-full', color)} />
+            {label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+interface BreakdownRowProps {
+  label: string;
+  value: string;
+  isNegative?: boolean;
+  isBold?: boolean;
+  badge?: string;
+}
+
+const BreakdownRow = memo(function BreakdownRow({
+  label,
+  value,
+  isNegative,
+  isBold,
+  badge,
+}: BreakdownRowProps) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <span
+          className={cn(
+            'text-sm',
+            isBold ? 'font-semibold text-neutral-900' : 'text-neutral-600',
+          )}
+        >
+          {label}
+        </span>
+        {badge && (
+          <span className="text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
+            {badge}
+          </span>
+        )}
+      </div>
+      <span
+        className={cn(
+          'tabular-nums',
+          isBold
+            ? 'text-base font-bold text-neutral-900'
+            : 'text-sm font-medium text-neutral-700',
+        )}
+      >
+        {isNegative && '−'}
+        {value}
+      </span>
+    </div>
+  );
+});
+
+interface TaxBracketRowProps {
+  bracket: TaxBracket;
+  isCurrent: boolean;
+}
+
+const TaxBracketRow = memo(function TaxBracketRow({
+  bracket,
+  isCurrent,
+}: TaxBracketRowProps) {
+  const text = isCurrent ? 'font-medium text-neutral-900' : 'text-neutral-500';
+  const value = isCurrent
+    ? 'font-semibold text-neutral-900'
+    : 'text-neutral-400';
+
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-[1fr_4rem_5rem] p-1 justify-between items-center rounded-lg transition-colors',
+        isCurrent && 'bg-neutral-100',
+      )}
+    >
+      <div className="flex items-center gap-2.5">
+        <span
+          className={cn(
+            'w-1.5 h-1.5 rounded-full shrink-0',
+            isCurrent ? 'bg-neutral-900' : 'bg-neutral-300',
+          )}
+        />
+        <span className={cn('text-sm tabular-nums', text)}>
+          {formatRange(bracket.min, bracket.max)}
+        </span>
+      </div>
+      <span className={cn('text-sm tabular-nums text-center', value)}>
+        {formatPercent(bracket.rate)}
+      </span>
+      <span className={cn('text-sm tabular-nums text-right', value)}>
+        {formatCurrency(bracket.baseAmount)}
+      </span>
+    </div>
+  );
+});
+
+interface TaxBracketsAccordionProps {
+  taxTable: TaxBracket[];
+  currentIndex: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+const TaxBracketsAccordion = memo(function TaxBracketsAccordion({
+  taxTable,
+  currentIndex,
+  isExpanded,
+  onToggle,
+}: TaxBracketsAccordionProps) {
+  const currentBracket = taxTable[currentIndex];
+
+  return (
+    <div className="gap-4 flex flex-col">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex items-center justify-between w-full"
+      >
+        <span className="text-sm font-medium text-neutral-600">
+          View Tax Brackets
+        </span>
+        <ChevronDown
+          className={cn(
+            'w-4 h-4 text-neutral-400 transition-transform duration-200',
+            isExpanded && 'rotate-180',
+          )}
+        />
+      </button>
+
+      <div
+        className={cn(
+          'grid transition-all duration-300 ease-in-out',
+          isExpanded
+            ? 'grid-rows-[1fr] opacity-100'
+            : 'grid-rows-[0fr] opacity-0',
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-col gap-1">
+            <div className="grid grid-cols-[1fr_4rem_5rem] gap-4 items-center text-xs font-medium text-neutral-400 tracking-wide">
+              <span>Income Range</span>
+              <span className="text-center">Rate</span>
+              <span className="text-right">Base</span>
+            </div>
+
+            <div className="gap-1 flex flex-col">
+              {taxTable.map((bracket, i) => (
+                <TaxBracketRow
+                  key={bracket.min}
+                  bracket={bracket}
+                  isCurrent={i === currentIndex}
+                />
+              ))}
+
+              {currentBracket && (
+                <p className="text-xs text-neutral-500 mt-3 px-3">
+                  Your marginal rate: {formatPercent(currentBracket.rate)}
+                  {currentBracket.baseAmount > 0 && (
+                    <span className="text-neutral-400">
+                      {' '}
+                      · Base: {formatCurrency(currentBracket.baseAmount)}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+interface ResultsSectionProps {
+  result: CalculateTaxResult;
+  isBracketsExpanded: boolean;
+  onToggleBrackets: () => void;
+}
+
+const ResultsSection = memo(function ResultsSection({
+  result,
+  isBracketsExpanded,
+  onToggleBrackets,
+}: ResultsSectionProps) {
+  const {
+    income,
+    netIncome,
+    incomeTax,
+    medicareLevy,
+    taxTable,
+    taxBracketIndex,
+  } = result;
+  const takeHomePercent = ((netIncome / income) * 100).toFixed(1);
+
+  return (
+    <div>
+      <div className="p-6 gap-4 flex flex-col bg-neutral-100">
+        <div className="text-center">
+          <p className="text-neutral-500 text-xs font-medium uppercase tracking-wider mb-1">
+            Take Home Pay
+          </p>
+          <p className="text-3xl sm:text-4xl font-semibold text-neutral-900 tabular-nums tracking-tight">
+            {formatCurrency(netIncome)}
+          </p>
+          <p className="text-neutral-500 text-sm mt-1">
+            {takeHomePercent}% of gross income
+          </p>
+        </div>
+        <ProgressBar
+          values={{ net: netIncome, tax: incomeTax, medicare: medicareLevy }}
+          total={income}
+        />
+      </div>
+
+      <div className="p-6 border-t border-neutral-100 flex flex-col gap-4">
+        <BreakdownRow
+          label="Gross Income"
+          value={formatCurrency(income)}
+          isBold
+        />
+        <div className="border-t border-neutral-100" />
+        <BreakdownRow
+          label="Income Tax"
+          value={formatCurrency(incomeTax)}
+          isNegative
+        />
+        <div className="border-t border-neutral-100" />
+        <BreakdownRow
+          label="Medicare Levy"
+          value={formatCurrency(medicareLevy)}
+          isNegative
+          badge="2%"
+        />
+        <div className="border-t-2 border-neutral-200" />
+        <BreakdownRow
+          label="Net Income"
+          value={formatCurrency(netIncome)}
+          isBold
+        />
+
+        <TaxBracketsAccordion
+          taxTable={taxTable}
+          currentIndex={taxBracketIndex}
+          isExpanded={isBracketsExpanded}
+          onToggle={onToggleBrackets}
+        />
+      </div>
+    </div>
+  );
+});
+
+const EmptyState = memo(function EmptyState() {
+  return (
+    <div className="px-6 py-12 text-center border-t border-neutral-100">
+      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-neutral-100 flex items-center justify-center">
+        <span className="text-xl text-neutral-400">$</span>
+      </div>
+      <p className="text-neutral-500 text-sm">
+        Enter your annual income to calculate
+      </p>
+    </div>
+  );
+});
+
+// Main Component
 export default function TaxCalculator() {
   const [selectedYear, setSelectedYear] = useState<FinancialYear>('2024-2025');
   const [income, setIncome] = useState('');
   const [isBracketsExpanded, setIsBracketsExpanded] = useState(false);
 
-  const yearId = 'year-select';
-  const incomeId = 'income-input';
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const incomeValue = Number.parseFloat(income) || 0;
-
   const result = useMemo(() => {
-    if (!income || incomeValue <= 0) return null;
-    return calculateTaxResult({
-      income: incomeValue,
-      financialYear: selectedYear,
-    });
-  }, [income, incomeValue, selectedYear]);
-
-  const takeHomePercent = result
-    ? ((result.netIncome / result.income) * 100).toFixed(1)
-    : '0';
+    const value = Number.parseFloat(income);
+    if (!value || value <= 0) return null;
+    return calculateTaxResult({ income: value, financialYear: selectedYear });
+  }, [income, selectedYear]);
 
   return (
     <div className="min-h-screen bg-neutral-50 p-4 sm:p-6 lg:p-8 flex items-start justify-center">
       <div className="w-full max-w-lg pt-8 sm:pt-16">
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-200/80">
           {/* Header */}
           <div className="px-6 pt-6 pb-5 border-b border-neutral-100">
@@ -60,19 +339,18 @@ export default function TaxCalculator() {
           </div>
 
           {/* Form */}
-          <div className="px-6 py-5 space-y-4">
+          <div className="px-6 py-5">
             <div className="grid sm:grid-cols-2 gap-4">
-              {/* Year Selection */}
               <div>
                 <label
-                  htmlFor={yearId}
+                  htmlFor="year-select"
                   className="block text-sm font-medium text-neutral-700 mb-1.5"
                 >
                   Financial Year
                 </label>
                 <div className="relative">
                   <select
-                    id={yearId}
+                    id="year-select"
                     value={selectedYear}
                     onChange={(e) =>
                       setSelectedYear(e.target.value as FinancialYear)
@@ -89,10 +367,9 @@ export default function TaxCalculator() {
                 </div>
               </div>
 
-              {/* Income Input */}
               <div>
                 <label
-                  htmlFor={incomeId}
+                  htmlFor="income-input"
                   className="block text-sm font-medium text-neutral-700 mb-1.5"
                 >
                   Annual Income
@@ -102,14 +379,14 @@ export default function TaxCalculator() {
                     $
                   </span>
                   <input
-                    id={incomeId}
+                    id="income-input"
                     type="number"
                     value={income}
                     onChange={(e) => setIncome(e.target.value)}
                     placeholder="0.00"
-                    className="w-full h-11 pl-7 pr-3.5 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm font-medium placeholder:text-neutral-400 placeholder:font-normal hover:bg-neutral-100 hover:border-neutral-300 focus:outline-none focus:bg-white focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                     min="0"
                     step="1"
+                    className="w-full h-11 pl-7 pr-3.5 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm font-medium placeholder:text-neutral-400 placeholder:font-normal hover:bg-neutral-100 hover:border-neutral-300 focus:outline-none focus:bg-white focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -118,232 +395,16 @@ export default function TaxCalculator() {
 
           {/* Results */}
           {result ? (
-            <>
-              {/* Primary Result */}
-              <div className="px-6 py-6 bg-neutral-100">
-                <div className="text-center">
-                  <p className="text-neutral-500 text-xs font-medium uppercase tracking-wider mb-1">
-                    Take Home Pay
-                  </p>
-                  <p className="text-3xl sm:text-4xl font-semibold text-neutral-900 tabular-nums tracking-tight">
-                    {formatCurrency(result.netIncome)}
-                  </p>
-                  <p className="text-neutral-500 text-sm mt-1">
-                    {takeHomePercent}% of gross income
-                  </p>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="mt-5">
-                  <div className="h-2 bg-neutral-200 rounded-full overflow-hidden flex">
-                    <div
-                      className="bg-neutral-700 transition-all duration-500 ease-out"
-                      style={{
-                        width: `${(result.netIncome / result.income) * 100}%`,
-                      }}
-                    />
-                    <div
-                      className="bg-neutral-400 transition-all duration-500 ease-out"
-                      style={{
-                        width: `${(result.incomeTax / result.income) * 100}%`,
-                      }}
-                    />
-                    <div
-                      className="bg-neutral-300 transition-all duration-500 ease-out"
-                      style={{
-                        width: `${(result.medicareLevy / result.income) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2 text-xs text-neutral-500">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-neutral-700" />
-                      Net
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-neutral-400" />
-                      Tax
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-neutral-300" />
-                      Medicare
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Breakdown */}
-              <div className="px-6 border-t border-neutral-100">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-sm text-neutral-600">
-                      Gross Income
-                    </span>
-                    <span className="text-sm font-semibold text-neutral-900 tabular-nums">
-                      {formatCurrency(result.income)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-t border-neutral-100">
-                    <span className="text-sm text-neutral-600">Income Tax</span>
-                    <span className="text-sm font-medium text-neutral-700 tabular-nums">
-                      −{formatCurrency(result.incomeTax)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-t border-neutral-100">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-neutral-600">
-                        Medicare Levy
-                      </span>
-                      <span className="text-[10px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
-                        2%
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium text-neutral-700 tabular-nums">
-                      −{formatCurrency(result.medicareLevy)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-3 border-t-2 border-neutral-200">
-                    <span className="text-sm font-semibold text-neutral-900">
-                      Net Income
-                    </span>
-                    <span className="text-base font-bold text-neutral-900 tabular-nums">
-                      {formatCurrency(result.netIncome)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tax Brackets - Collapsible */}
-              <div >
-                <button
-                  type="button"
-                  onClick={() => setIsBracketsExpanded(!isBracketsExpanded)}
-                  className="flex items-center justify-between w-full px-6 py-4"
-                >
-                  <span className="text-sm font-medium text-neutral-600">
-                    View Tax Brackets
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${
-                      isBracketsExpanded ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                <div
-                  className={`grid transition-all duration-300 ease-in-out ${
-                    isBracketsExpanded
-                      ? 'grid-rows-[1fr] opacity-100'
-                      : 'grid-rows-[0fr] opacity-0'
-                  }`}
-                >
-                  <div className="overflow-hidden">
-                    <div className="px-6 pb-5 flex flex-col gap-1">
-                      {/* Header */}
-                      <div className="grid grid-cols-[1fr_4rem_5rem] gap-4 items-center py-2 px-3">
-                        <span className="text-xs font-medium text-neutral-400  tracking-wide">
-                          Income Range
-                        </span>
-                        <span className="text-xs font-medium text-neutral-400  tracking-wide text-center">
-                          Rate
-                        </span>
-                        <span className="text-xs font-medium text-neutral-400  tracking-wide text-right">
-                          Base
-                        </span>
-                      </div>
-                      {result.taxTable.map((bracket, index) => {
-                        const isCurrentBracket =
-                          index === result.taxBracketIndex;
-
-                        const formatRange = (min: number, max: number) => {
-                          if (max === Infinity) {
-                            return `${formatCurrency(min)}+`;
-                          }
-                          return `${formatCurrency(min)} – ${formatCurrency(max)}`;
-                        };
-
-                        return (
-                          <div
-                            key={`${bracket.min}-${bracket.max}`}
-                            className={`grid grid-cols-[1fr_4rem_5rem] gap-4 items-center py-2 px-3 rounded-lg transition-colors ${
-                              isCurrentBracket ? 'bg-neutral-100' : ''
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                  isCurrentBracket
-                                    ? 'bg-neutral-900'
-                                    : 'bg-neutral-300'
-                                }`}
-                              />
-                              <span
-                                className={`text-sm tabular-nums ${
-                                  isCurrentBracket
-                                    ? 'font-medium text-neutral-900'
-                                    : 'text-neutral-500'
-                                }`}
-                              >
-                                {formatRange(bracket.min, bracket.max)}
-                              </span>
-                            </div>
-                            <span
-                              className={`text-sm tabular-nums text-center ${
-                                isCurrentBracket
-                                  ? 'font-semibold text-neutral-900'
-                                  : 'text-neutral-400'
-                              }`}
-                            >
-                              {(bracket.rate * 100).toFixed(0)}%
-                            </span>
-                            <span
-                              className={`text-sm tabular-nums text-right ${
-                                isCurrentBracket
-                                  ? 'font-semibold text-neutral-900'
-                                  : 'text-neutral-400'
-                              }`}
-                            >
-                              {formatCurrency(bracket.baseAmount)}
-                            </span>
-                          </div>
-                        );
-                      })}
-                      {result.taxBracketIndex >= 0 &&
-                        (() => {
-                          const currentBracket =
-                            result.taxTable[result.taxBracketIndex];
-                          if (!currentBracket) return null;
-                          return (
-                            <p className="text-xs text-neutral-500 mt-3 px-3">
-                              Your marginal rate:{' '}
-                              {(currentBracket.rate * 100).toFixed(0)}%
-                              {currentBracket.baseAmount > 0 && (
-                                <span className="text-neutral-400">
-                                  {' '}
-                                  · Base:{' '}
-                                  {formatCurrency(currentBracket.baseAmount)}
-                                </span>
-                              )}
-                            </p>
-                          );
-                        })()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+            <ResultsSection
+              result={result}
+              isBracketsExpanded={isBracketsExpanded}
+              onToggleBrackets={() => setIsBracketsExpanded((prev) => !prev)}
+            />
           ) : (
-            <div className="px-6 py-12 text-center border-t border-neutral-100">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-neutral-100 flex items-center justify-center">
-                <span className="text-xl text-neutral-400">$</span>
-              </div>
-              <p className="text-neutral-500 text-sm">
-                Enter your annual income to calculate
-              </p>
-            </div>
+            <EmptyState />
           )}
         </div>
 
-        {/* Footer */}
         <p className="text-center text-xs text-neutral-400 mt-6 px-4">
           Estimates based on ATO rates. Excludes HELP, offsets & deductions.{' '}
           <a

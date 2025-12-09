@@ -14,7 +14,12 @@
     "ui:install": "cd ui && npm install",
     "build": "tsc"
   },
-  "keywords": ["tax", "calculator", "australia", "ato"],
+  "keywords": [
+    "tax",
+    "calculator",
+    "australia",
+    "ato"
+  ],
   "author": "joyceeeen",
   "license": "ISC",
   "type": "commonjs",
@@ -29,6 +34,8 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "clsx": "^2.1.1",
+    "lodash": "^4.17.21",
+    "tailwind-merge": "^3.4.0"
   }
 }
