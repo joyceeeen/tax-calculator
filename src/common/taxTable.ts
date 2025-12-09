@@ -1,4 +1,4 @@
-import type { TaxTable } from "../types";
+import type { TaxTable } from "../types/types";
 
 // Reference: https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents#ato-Australianresidenttaxrates2020to2026
 export const taxTable: TaxTable = {

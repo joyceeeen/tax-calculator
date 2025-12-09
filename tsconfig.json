@@ -38,6 +38,12 @@
       "@/*": ["./src/*"]
     }
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "verbatimModuleSyntax": false
+    }
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
