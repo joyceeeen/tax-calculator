@@ -226,7 +226,7 @@ function ResultsSection({
   onToggleBrackets: () => void;
 }) {
   const { income, netIncome, incomeTax, medicareLevy, taxTable, taxBracketIndex } = result;
-  const takeHomePercent = ((netIncome / income) * 100).toFixed(1);
+  const takeHomePercent = formatPercent((netIncome / income));
 
   return (
     <div>
