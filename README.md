@@ -15,27 +15,24 @@ A comprehensive Australian Income Tax Calculator featuring a shared calculation 
 
 ```
 tax-calculator/
+├── apps/
+│   ├── cli/
+│   │   └── index.ts              # Command-line interface
+│   └── ui/                       # React + Vite application
 ├── packages/
 │   └── tax-calc/                 # Core calculation library
 │       ├── index.ts              # Public exports
 │       ├── types.ts              # TypeScript types
 │       ├── common/
 │       │   ├── calcuators.ts     # Tax calculation logic
-│       │   └── taxTable.ts       # ATO tax brackets
+│       │   └── constants.ts      # Tax brackets & constants
 │       └── tests/
-│           └── calculateTax.test.ts
-├── cli/
-│   └── index.ts                  # Command-line interface
-├── ui/                           # React + Vite application
-│   ├── src/
-│   │   ├── components/
-│   │   │   └── TaxCalculator.tsx
-│   │   └── utils/
-│   ├── package.json
-│   └── vite.config.ts
+│           └── calculator.test.ts
+├── biome.json
+├── jest.config.js
 ├── package.json
 ├── tsconfig.json
-└── jest.config.js
+└── README.md
 ```
 
 ## Getting Started
@@ -140,8 +137,3 @@ The calculator uses the official ATO tax rates for Australian residents. It calc
 ## Reference
 
 - [ATO Tax Rates - Australian Residents](https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents)
-
-## License
-
-ISC
-
