@@ -34,6 +34,6 @@
       "verbatimModuleSyntax": false
     }
   },
-  "include": ["packages/**/*", "cli/**/*"],
-  "exclude": ["node_modules", "dist", "ui"]
+  "include": ["packages/**/*", "apps/cli/**/*"],
+  "exclude": ["node_modules", "dist", "apps/ui"]
 }
