@@ -1,14 +1,22 @@
 {
+  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    "rootDir": ".",
+    // File Layout
+    "rootDir": "src",
     "outDir": "dist",
     "module": "ESNext",
     "target": "es2022",
+
+    // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
+
+    // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
+
+    // Style Options
     "noImplicitReturns": true,
     "noImplicitOverride": true,
     "noUnusedLocals": true,
@@ -16,6 +24,8 @@
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitAny": true,
+
+
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
@@ -23,9 +33,9 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "baseUrl": ".",
+
     "paths": {
-      "@lib/*": ["./packages/*"]
+      "@/*": ["./src/*"]
     }
   },
   "ts-node": {
@@ -34,6 +44,6 @@
       "verbatimModuleSyntax": false
     }
   },
-  "include": ["packages/**/*", "cli/**/*"],
-  "exclude": ["node_modules", "dist", "ui"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
