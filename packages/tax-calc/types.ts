@@ -6,11 +6,11 @@ export type TaxBracket = {
 };
 
 export const FINANCIAL_YEARS = [
-  "2021-2022",
-  "2022-2023",
-  "2023-2024",
-  "2024-2025",
-  "2025-2026",
+  '2021-2022',
+  '2022-2023',
+  '2023-2024',
+  '2024-2025',
+  '2025-2026',
 ] as const;
 
 export type FinancialYear = (typeof FINANCIAL_YEARS)[number];
@@ -31,4 +31,4 @@ export type CalculateTaxResult = {
   deductions: number;
   taxTable: TaxBracket[];
   taxBracketIndex: number;
-}
+};

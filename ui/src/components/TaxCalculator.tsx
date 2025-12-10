@@ -225,8 +225,15 @@ function ResultsSection({
   isBracketsExpanded: boolean;
   onToggleBrackets: () => void;
 }) {
-  const { income, netIncome, incomeTax, medicareLevy, taxTable, taxBracketIndex } = result;
-  const takeHomePercent = formatPercent((netIncome / income));
+  const {
+    income,
+    netIncome,
+    incomeTax,
+    medicareLevy,
+    taxTable,
+    taxBracketIndex,
+  } = result;
+  const takeHomePercent = formatPercent(netIncome / income);
 
   return (
     <div>
@@ -249,9 +256,17 @@ function ResultsSection({
       </div>
 
       <div className="p-6 border-t border-neutral-100 flex flex-col gap-4">
-        <BreakdownRow label="Gross Income" value={formatCurrency(income)} isBold />
+        <BreakdownRow
+          label="Gross Income"
+          value={formatCurrency(income)}
+          isBold
+        />
         <div className="border-t border-neutral-100" />
-        <BreakdownRow label="Income Tax" value={formatCurrency(incomeTax)} isNegative />
+        <BreakdownRow
+          label="Income Tax"
+          value={formatCurrency(incomeTax)}
+          isNegative
+        />
         <div className="border-t border-neutral-100" />
         <BreakdownRow
           label="Medicare Levy"
@@ -260,7 +275,11 @@ function ResultsSection({
           badge="2%"
         />
         <div className="border-t-2 border-neutral-200" />
-        <BreakdownRow label="Net Income" value={formatCurrency(netIncome)} isBold />
+        <BreakdownRow
+          label="Net Income"
+          value={formatCurrency(netIncome)}
+          isBold
+        />
 
         <TaxBracketsAccordion
           taxTable={taxTable}
@@ -319,7 +338,9 @@ export default function TaxCalculator() {
                   <select
                     id="year-select"
                     value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value as FinancialYear)}
+                    onChange={(e) =>
+                      setSelectedYear(e.target.value as FinancialYear)
+                    }
                     className="w-full h-11 px-3.5 pr-9 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm font-medium appearance-none cursor-pointer hover:bg-neutral-100 hover:border-neutral-300 focus:outline-none focus:bg-white focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                   >
                     {FINANCIAL_YEARS.map((year) => (

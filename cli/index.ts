@@ -1,10 +1,14 @@
-import * as readline from "node:readline/promises";
-import { calculateTax, FINANCIAL_YEARS, type FinancialYear } from "../packages/tax-calc/index";
+import * as readline from 'node:readline/promises';
+import {
+  calculateTax,
+  FINANCIAL_YEARS,
+  type FinancialYear,
+} from '../packages/tax-calc/index';
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("en-AU", {
-    style: "currency",
-    currency: "AUD",
+  new Intl.NumberFormat('en-AU', {
+    style: 'currency',
+    currency: 'AUD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
@@ -23,20 +27,20 @@ async function main() {
   );
   if (!isValidFinancialYear(yearInput)) {
     console.error(
-      `\nInvalid income year. Supported years: ${FINANCIAL_YEARS.join(", ")}`,
+      `\nInvalid income year. Supported years: ${FINANCIAL_YEARS.join(', ')}`,
     );
     rl.close();
     return;
   }
 
   const incomeInput = await rl.question(
-    "\nPlease enter your total taxable income: ",
+    '\nPlease enter your total taxable income: ',
   );
   rl.close();
 
   const income = parseFloat(incomeInput);
   if (Number.isNaN(income) || income < 0) {
-    console.error("\nInvalid income. Please enter a valid positive number.");
+    console.error('\nInvalid income. Please enter a valid positive number.');
     return;
   }
 
@@ -47,4 +51,3 @@ async function main() {
 }
 
 main();
-
