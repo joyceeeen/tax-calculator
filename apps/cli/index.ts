@@ -3,7 +3,7 @@ import {
   calculateTax,
   FINANCIAL_YEARS,
   type FinancialYear,
-} from '../packages/tax-calc/index';
+} from '../../packages/tax-calc/index';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-AU', {
@@ -51,3 +51,4 @@ async function main() {
 }
 
 main();
+
