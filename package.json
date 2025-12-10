@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "description": "Australian Tax Calculator - CLI and UI",
   "main": "lib/index.js",
+  "workspaces": [
+    "ui"
+  ],
   "scripts": {
     "test": "jest",
     "biome:fix": "biome format --write .",
     "biome:check": "biome check .",
     "cli": "ts-node cli/index.ts",
-    "ui:dev": "cd ui && npm run dev",
-    "ui:build": "cd ui && npm run build",
-    "ui:preview": "cd ui && npm run preview",
-    "ui:install": "cd ui && npm install",
+    "ui:dev": "npm run dev -w ui",
+    "ui:build": "npm run build -w ui",
+    "ui:preview": "npm run preview -w ui",
     "build": "tsc"
   },
   "keywords": [
