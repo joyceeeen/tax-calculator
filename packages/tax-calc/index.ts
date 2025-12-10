@@ -1,5 +1,5 @@
 export { calculateTax, calculateTaxResult } from './common/calcuators';
-export { TAX_TABLE } from './common/taxTable';
+export { TAX_TABLE } from './common/constants';
 export {
   type CalculateTaxParams,
   type CalculateTaxResult,

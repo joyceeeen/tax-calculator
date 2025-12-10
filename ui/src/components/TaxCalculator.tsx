@@ -293,7 +293,7 @@ function ResultsSection({
 }
 
 export default function TaxCalculator() {
-  const [selectedYear, setSelectedYear] = useState<FinancialYear>('2024-2025');
+  const [selectedYear, setSelectedYear] = useState<FinancialYear>('2025-2026');
   const [income, setIncome] = useState('');
   const [isBracketsExpanded, setIsBracketsExpanded] = useState(false);
 

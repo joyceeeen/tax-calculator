@@ -38,3 +38,5 @@ export const TAX_TABLE: TaxTable = {
     { min: 190_001, max: Infinity, rate: 0.45, baseAmount: 51_638 },
   ],
 };
+
+export const MEDICARE_LEVY_RATE = 0.02;

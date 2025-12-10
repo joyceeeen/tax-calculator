@@ -1,5 +1,5 @@
 import type { CalculateTaxParams, CalculateTaxResult } from '../types';
-import { TAX_TABLE } from './taxTable';
+import { MEDICARE_LEVY_RATE, TAX_TABLE } from './constants';
 
 export const calculateTax = (params: CalculateTaxParams): number => {
   const { financialYear, income } = params;
@@ -34,7 +34,7 @@ const findTaxBracketIndex = (params: CalculateTaxParams): number => {
 
 export const calculateMedicareLevy = (params: CalculateTaxParams): number => {
   const { income } = params;
-  return income * 0.02;
+  return income * MEDICARE_LEVY_RATE;
 };
 
 export const calculateTaxResult = (
